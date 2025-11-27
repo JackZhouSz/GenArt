@@ -220,7 +220,7 @@ void TestKernel(float *fDevPtr, int wid, float v)
 
 void InvokeTestKernel(float* devFloats, int wid, float v)
 {
-    dim3 threads(BLOCKDIM_X);
+    // dim3 threads(BLOCKDIM_X);
     dim3 grid((wid + BLOCKDIM_X - 1) / BLOCKDIM_X);
 
     //  TestKernel<<<grid, threads>>>(devFloats, wid, v);
