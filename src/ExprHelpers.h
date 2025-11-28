@@ -21,7 +21,7 @@ struct opInfo {
     VarVals_t vn; // Used only for variable names and count of variables
     interval spans[VarVals_t::NUM_VARS];
     float maxAbsErr;    // All values on interval must be within this percent difference to optimize
-    int steps;          // Number of samples across the interval to compare per variable
+    int sampSteps;          // Number of samples across the interval to compare per variable
     bool stopAtMaxErr;  // True to stop sampling once the interval is larger than MaxErr
     int phase;          // Optimization phase number (0,1,2,3)
     bool swapSymmetric; // True to swap left and right children of symmetric binary operators

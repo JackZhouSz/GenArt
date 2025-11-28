@@ -218,7 +218,7 @@ public:
         // std::sort(m_table.begin(), m_table.end());
     }
 
-    void insert_span(interval m, int steps, bool log_scale = false)
+    void insert_span(interval m, int sampSteps, bool log_scale = false)
     {
         float mn = m.lower_finite();
         float mx = m.upper_finite();
@@ -245,14 +245,14 @@ public:
             ASSERT_D(mn >= 0 && mx >= 0);
 
             float f = mn + 0.1f;
-            for (int i = 0; i < steps && f < mx; i++) {
+            for (int i = 0; i < sampSteps && f < mx; i++) {
                 f *= 1.21f + float(i);
                 insert(f);
                 insert(-f);
             }
         } else {
             // Compute interval across its range
-            float fStep = span / float(steps);
+            float fStep = span / float(sampSteps);
             for (float f = mn; f <= mx; f += fStep) { insert(f); }
         }
     }
@@ -291,7 +291,7 @@ interval sampleIval(const Expr* E, const opInfo& opI, const interval& lv, const 
     interval iout;
     VarVals_t VV = opI.vn;
 
-    SampleSet xSS((hasV & 1) ? interval(opI.spans[0]) : interval(), opI.steps);
+    SampleSet xSS((hasV & 1) ? interval(opI.spans[0]) : interval(), opI.sampSteps);
     if (hasV & 2) {
         xSS.insert_span(opI.spans[1], 1);
         xSS.insert_span(-opI.spans[1], 1);
@@ -300,7 +300,7 @@ interval sampleIval(const Expr* E, const opInfo& opI, const interval& lv, const 
         xSS.insert_span(opI.spans[2], 1);
         xSS.insert_span(-opI.spans[2], 1);
     }
-    SampleSet ySS((hasV & 2) ? interval(opI.spans[1]) : interval(), opI.steps);
+    SampleSet ySS((hasV & 2) ? interval(opI.spans[1]) : interval(), opI.sampSteps);
     if (hasV & 1) {
         ySS.insert_span(opI.spans[0], 1);
         ySS.insert_span(-opI.spans[0], 1);
@@ -309,7 +309,7 @@ interval sampleIval(const Expr* E, const opInfo& opI, const interval& lv, const 
         ySS.insert_span(opI.spans[2], 1);
         ySS.insert_span(-opI.spans[2], 1);
     }
-    SampleSet rSS((hasV & 4) ? interval(opI.spans[2]) : interval(), opI.steps);
+    SampleSet rSS((hasV & 4) ? interval(opI.spans[2]) : interval(), opI.sampSteps);
     if (hasV & 1) {
         rSS.insert_span(opI.spans[0], 1);
         rSS.insert_span(-opI.spans[0], 1);
@@ -358,7 +358,7 @@ interval sampleIval(const Expr* E, const opInfo& opI, const interval& lv, const 
 // Only do this when the descendant itself is about to be deleted.
 // Since Opt() may call GrabRL() on itself it must immediately return so as not to access the left and right pointers, which are now NULL.
 
-Expr* Optimize(const Expr* E, const VarVals_t& MinVV, const VarVals_t& MaxVV, const int steps, const float maxAbsErr, const interval outSpan)
+Expr* Optimize(const Expr* E, const VarVals_t& MinVV, const VarVals_t& MaxVV, const int sampSteps, const float maxAbsErr, const interval outSpan)
 {
     Expr* F = E->Copy();
     int sizePre = E->size();
@@ -366,7 +366,7 @@ Expr* Optimize(const Expr* E, const VarVals_t& MinVV, const VarVals_t& MaxVV, co
     opInfo opI;
     opI.vn = MinVV;
     for (int phase = 0; phase < VarVals_t::NUM_VARS; phase++) opI.spans[phase] = interval(MinVV.vals[phase], MaxVV.vals[phase]);
-    opI.steps = steps;
+    opI.sampSteps = sampSteps;
     opI.maxAbsErr = maxAbsErr;
 
     for (opI.phase = 0; opI.phase < 4; opI.phase++) {
@@ -381,7 +381,7 @@ Expr* Optimize(const Expr* E, const VarVals_t& MinVV, const VarVals_t& MaxVV, co
                 delete F;
                 F = A;
             }
-        } while ((A || j < 15) && j++ < 40);
+        } while ((A || j < 15) && j++ < 40); // Try 15 times even with no change in expr, then up to 40 times with changes
     }
 
     // Clamp to the color space's interval
@@ -620,6 +620,7 @@ Expr* MakeConst(const float v) { return new Const(v); }
 bool IsConst(const Expr* E) { return typeid(*E) == typeid(Const); }
 
 namespace {
+// Recursive worker for RemoveNestedIFS
 Expr* FixIFS(Expr* E, bool InIFS)
 {
     if (typeid(*E) == typeid(IFS)) {
@@ -673,14 +674,25 @@ Expr* RemoveNestedIFS(const Expr* E)
     return F;
 }
 
-// If the root node is already Mult we could just modify the existing multiplicand
 Expr* ScaleBias(Expr* E, const float scale, const float bias)
 {
     Expr* F = E->Copy();
-    if (scale == 1.0f)
-        return new Plus(F, new Const(bias));
-    else if (bias == 1.0f)
-        return new Mult(new Const(scale), F);
-    else
-        return new Plus(new Mult(new Const(scale), F), new Const(bias));
+
+    // If the root node is already Mult we could just modify the existing multiplicand
+    if (typeid(*F) == typeid(Mult) && bias == 0.0f) {
+        Const* C = NULL;
+        if (typeid(*(F->left)) == typeid(Const))
+            C = dynamic_cast<Const*>(F->left);
+        else if (typeid(*(F->right)) == typeid(Const))
+            C = dynamic_cast<Const*>(F->right);
+        if (C) {
+            C->SetConst(C->Eval(NULL) * scale);
+            return F;
+        }
+    }
+
+    if (scale != 1.0f) F = new Mult(new Const(scale), F);
+    if (bias != 0.0f) F = new Plus(F, new Const(bias));
+
+    return F;
 }

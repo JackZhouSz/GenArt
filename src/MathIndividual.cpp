@@ -57,6 +57,10 @@ MathIndividual::~MathIndividual()
 #endif
 }
 
+namespace {
+float dist2d(float x, float y) { return sqrtf(sqr(x) + sqr(y)); }
+}; // namespace
+
 void MathIndividual::init(Expr* Ri, Expr* Gi, Expr* Bi, ColorMap<f3Pixel>* CMap_)
 {
     // Get ready for numeric optimization
@@ -73,23 +77,32 @@ void MathIndividual::init(Expr* Ri, Expr* Gi, Expr* Bi, ColorMap<f3Pixel>* CMap_
     MinVV.vals[1] = Ymin;
     MaxVV.vals[1] = Ymin + BoxWid * RMan->thHgt / RMan->thWid;
 
-    interval rivl; // Find the min and max r values of the four corners of the viewport
-    rivl.extend(sqrtf(sqr(MinVV.vals[0]) + sqr(MinVV.vals[1])));
-    rivl.extend(sqrtf(sqr(MinVV.vals[0]) + sqr(MaxVV.vals[1])));
-    rivl.extend(sqrtf(sqr(MaxVV.vals[0]) + sqr(MinVV.vals[1])));
-    rivl.extend(sqrtf(sqr(MaxVV.vals[0]) + sqr(MaxVV.vals[1])));
-    // The zero-crossings
-    // XXX: These points may not be inside the viewport!!!
-    rivl.extend(sqrtf(MinVV.vals[0] * MinVV.vals[0]));
-    rivl.extend(sqrtf(MinVV.vals[1] * MinVV.vals[1]));
-    rivl.extend(sqrtf(MaxVV.vals[0] * MaxVV.vals[0]));
-    rivl.extend(sqrtf(MaxVV.vals[1] * MaxVV.vals[1]));
+    // The max r value is at one of the four corners of the viewport
+    interval rivl;
+    rivl.extend(dist2d(MinVV.vals[0], MinVV.vals[1]));
+    rivl.extend(dist2d(MinVV.vals[0], MaxVV.vals[1]));
+    rivl.extend(dist2d(MaxVV.vals[0], MinVV.vals[1]));
+    rivl.extend(dist2d(MaxVV.vals[0], MaxVV.vals[1]));
 
-    if (MinVV.vals[0] < 0 && MaxVV.vals[0] > 0 && MinVV.vals[1] < 0 && MaxVV.vals[1] > 0) rivl.extend(0); // Origin inside viewport
+    // The min r value is at one of the axes
+    if (MinVV.vals[0] < 0.f && MaxVV.vals[0] > 0.f) {
+        rivl.extend(dist2d(0.f, MinVV.vals[1]));
+        rivl.extend(dist2d(0.f, MaxVV.vals[1]));
+    }
+    if (MinVV.vals[1] < 0.f && MaxVV.vals[1] > 0.f) {
+        rivl.extend(dist2d(MinVV.vals[0], 0.f));
+        rivl.extend(dist2d(MaxVV.vals[0], 0.f));
+    }
+
+    // Origin inside viewport
+    if (MinVV.vals[0] < 0 && MaxVV.vals[0] > 0 && MinVV.vals[1] < 0 && MaxVV.vals[1] > 0) rivl.extend(0.f);
+
+    ASSERT_D(rivl.lower >= 0.f);
 
     MinVV.vals[2] = rivl.lower;
     MaxVV.vals[2] = rivl.upper;
 
+    // Optimize Exprs
     MSEng->setTotalSizeBeforeOpt(MSEng->getTotalSizeBeforeOpt() + Ri->size() + Gi->size() + Bi->size());
 
     interval spans[3];
@@ -101,6 +114,7 @@ void MathIndividual::init(Expr* Ri, Expr* Gi, Expr* Bi, ColorMap<f3Pixel>* CMap_
 
     MSEng->setTotalSizeAfterOpt(MSEng->getTotalSizeAfterOpt() + R->size() + G->size() + B->size());
 
+    // Import the ColorMap
     if (CMap_ != NULL && CMap_->size() > 0) {
         if (CMap_->size() < CMAP_SIZE) {
             CMap = ColorMap<f3Pixel>(*CMap_, CMAP_SIZE); // Upsample to desired size
@@ -134,7 +148,7 @@ Expr* MathIndividual::OptimizeChannel(Expr* A0, VarVals_t MinVV, VarVals_t MaxVV
     return A0;
 }
 
-// Make a total random ColorMap
+// Make a totally random ColorMap
 void MathIndividual::ColorMapRandomize()
 {
     FillColorMapRandom(CMap);

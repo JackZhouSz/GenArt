@@ -77,6 +77,7 @@ bool Const::isless(const Expr* E) const
 }
 
 void Const::UniformRandom() { val = frand(); }
+void Const::SetConst(float v) { val = v; }
 
 Const::Const()
 {

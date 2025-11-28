@@ -228,7 +228,7 @@ void UI::StartUI(int& argc, char** argv)
 
     glutAddMenuEntry("___________________", 765);
     glutAddMenuEntry("e: Save the World", 'e');
-    glutAddMenuEntry("t: Sort by Score", 't');
+    glutAddMenuEntry("t: Cycle sorting order", 't');
     glutAddMenuEntry("<: Decrease variability 5%", '<');
     glutAddMenuEntry(">: Decrease variability 5%", '>');
     glutAddMenuEntry("a: Auto Evolve on/off", 'a');

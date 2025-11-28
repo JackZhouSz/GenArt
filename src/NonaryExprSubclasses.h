@@ -47,6 +47,7 @@ public:
     Const(float v);
 
     void UniformRandom(); // Fill this constant with a uniform random variable on 0..1
+    void SetConst(float v); // Fill this constant with value v
 
     unsigned int HasVars() const { return 0u; }
 

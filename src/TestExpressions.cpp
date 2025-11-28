@@ -227,7 +227,7 @@ public:
 
 class TestItemOptimizer {
 public:
-    TestItemOptimizer(VarVals_t vvals_, int Steps_ = 531, float maxAbsErr_ = 0.01f) : Steps(Steps_), maxAbsErr(maxAbsErr_), MinVV(vvals_), MaxVV(vvals_)
+    TestItemOptimizer(VarVals_t vvals_, int sampSteps_ = 531, float maxAbsErr_ = 0.01f) : sampSteps(sampSteps_), maxAbsErr(maxAbsErr_), MinVV(vvals_), MaxVV(vvals_)
     {
         for (size_t i = 0; i < MinVV.vals.size(); i++) {
             MinVV.vals[i] = 0.0f;
@@ -240,7 +240,7 @@ public:
         interval outSpan;
         outSpan.set_infinite();
 
-        Expr* O = Optimize(A, MinVV, MaxVV, Steps, maxAbsErr, outSpan);
+        Expr* O = Optimize(A, MinVV, MaxVV, sampSteps, maxAbsErr, outSpan);
         // std::cerr << O->Print(PREFIX) << std::endl << O->Print(PREFIX) << std::endl;
 
         return O;
@@ -249,7 +249,7 @@ public:
 private:
     VarVals_t MinVV;
     VarVals_t MaxVV;
-    int Steps;
+    int sampSteps;
     float maxAbsErr;
 };
 
@@ -435,8 +435,8 @@ private:
 
 class SamplerLoopInterval {
 public:
-    SamplerLoopInterval(VarVals_t vvals_, RelAbsComparator RAC_, int numSamples_ = 100000, int Steps_ = 531) :
-        numSamples(numSamples_), Steps(Steps_), Comp(RAC_), VV(vvals_)
+    SamplerLoopInterval(VarVals_t vvals_, RelAbsComparator RAC_, int numSamples_ = 100000, int sampSteps_ = 531) :
+        numSamples(numSamples_), sampSteps(sampSteps_), Comp(RAC_), VV(vvals_)
     {
     }
 
@@ -459,7 +459,7 @@ private:
     bool compareInterval(Expr* A)
     {
         opInfo opI;
-        opI.steps = Steps;
+        opI.sampSteps = sampSteps;
         opI.maxAbsErr = 0.0f; // Unused since stopAtMaxErr is false
         opI.stopAtMaxErr = false;
         opI.vn = VV;
@@ -527,7 +527,7 @@ private:
     }
 
     int numSamples;
-    int Steps;
+    int sampSteps;
     RelAbsComparator Comp;
     VarVals_t VV;
 };

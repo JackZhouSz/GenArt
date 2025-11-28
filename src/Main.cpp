@@ -209,7 +209,7 @@ static void Args(int& argc, char** argv)
             char tmpFName[1000];
             sprintf(tmpFName, "%s", argv[i]);
             char* dot = strrchr(tmpFName, '.');
-            *dot = '\0';
+            if (dot) *dot = '\0';
 
 #ifdef WIN32
             // Change forward slashes to backslashes
