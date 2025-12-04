@@ -76,7 +76,7 @@ static void Usage(const char* message = NULL, const bool Exit = true)
     std::cerr << "-thsize <wid> <hgt|asp>   Width and height of thumbnail images (" << RMan->thWid << "x" << RMan->thHgt << ")\n";
     std::cerr << "-size <wid> <hgt|asp>     Width and height of output images (" << RMan->finalWid << "x" << RMan->finalHgt << ")\n";
     std::cerr << "-evolveimg <im.jpg>       Specify an image to evolve to be like\n";
-    std::cerr << "-noopt                    Don't optimize expressions\n";
+    std::cerr << "-O <level>                Optimization level (0 = don't optimize; currently " << MSEng->getOptLevel() << ")\n";
     std::cerr << "-test                     Run weird tests\n";
     std::cerr << "-testex fname.txt         Run expression tests with input list of expressions\n";
 
@@ -191,9 +191,9 @@ static void Args(int& argc, char** argv)
             Q.MinSamples = atof(argv[i + 1]);
             RMan->setQuality(RMan->thumbQuality, Q);
             RemoveArgs(argc, argv, i, 2);
-        } else if (starg == "-noopt") {
-            MSEng->setOptimize(false);
-            RemoveArgs(argc, argv, i);
+        } else if (starg == "-O") {
+            MSEng->setOptLevel(atoi(argv[i + 1]));
+            RemoveArgs(argc, argv, i, 2);
         } else if (starg == "-colormapimg") { // Makes an indiv and loads it like a gnx file
             MSEng->ImageColorMapToIndiv(argv[i + 1], atoi(argv[i + 2]));
             RemoveArgs(argc, argv, i, 3);

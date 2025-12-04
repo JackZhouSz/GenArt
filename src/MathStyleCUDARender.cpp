@@ -144,7 +144,7 @@ float MathStyleCUDARender::computeDeviceOpsPerMS()
     CUDA_SAFE_CALL(cudaGetDeviceProperties(&deviceProp, CUDARender::m_deviceId));
     checkCUDAError("cudaGetDeviceProperties");
 
-    int clocksPerMS = 1282000; // KHz
+    int clocksPerMS = 1282000;                                              // KHz
     float scaleFactorSM = deviceProp.multiProcessorCount > 8 ? 2.0f : 1.0f; // Fast SM?
     float clocksPerOp = 5.0f;
     float devOpsPerMS = float(clocksPerMS) * float(deviceProp.multiProcessorCount) * scaleFactorSM / clocksPerOp;

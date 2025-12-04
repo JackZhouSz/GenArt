@@ -29,7 +29,7 @@ public:
 
     void IndividualOps(int c, int x, int y); // Operations that can be done on an individual
 
-    void MathStyleOps(int c, MathIndividual::shp ind); // Operations specific to the Math Style
+    bool MathStyleOps(int c, MathIndividual::shp ind); // Operations specific to the Math Style
 
     void GeneralOps(int c, int x, int y); // Operations not specific to one individual
 

@@ -47,7 +47,7 @@ DMC_LOC f3Pixel Saturatef3(const f3Pixel& val) { return f3Pixel(Saturate(val.r()
 // G = Y - 0.34414 (Cb-128) - 0.71414 (Cr-128)
 // B = Y + 1.772 (Cb-128)
 
-// Actually Cr,Y,Cb
+// Actually Cr,Y,Cb so that Y maps to Green, which is the largest response
 DMC_LOC f3Pixel YCrCbtoRGB(const f3Pixel& YCrCb)
 {
     float r = YCrCb.r() + YCrCb.g();
@@ -59,10 +59,10 @@ DMC_LOC f3Pixel YCrCbtoRGB(const f3Pixel& YCrCb)
 
 // Assume Foley & VanDam HSV
 // Hue 0...1 does all six hues. Other values wrap to this.
-// V 0..1 maps directly to one of the channels.
-// S can be anything.
+// Value 0..1 maps directly to one of the channels.
+// Saturation can be anything.
 // Valid input range is 0..1 for all three. Can handle anything, though.
-// Actually H,V,S
+// Actually H,V,S so that V maps to Green, which is the largest response
 DMC_LOC f3Pixel HSVtoRGB(const f3Pixel& HSV)
 {
     int Hi = (int)HSV.r();

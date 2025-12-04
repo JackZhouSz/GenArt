@@ -214,7 +214,7 @@ Expr* BinaryExpr::Mutate(const int prob, const int siz, const float ConstPerturb
             left = right;
             right = T;
             return this;
-        }   // For symmetric functions, fall through.
+        } // For symmetric functions, fall through.
     case 4: // Replace with new expression
         return RandExpr(siz, VV);
     }
@@ -451,7 +451,7 @@ Expr* Div::Opt(const opInfo& opI)
 
 float IFS::Eval(const VarVals_t* VV /*= NULL*/) const
 {
-    static VarVals_t VVDummy(2); // XXX Does this static provide enough optimization to be worth it?
+    VarVals_t VVDummy;
     if (VV == NULL) VV = &VVDummy;
     return IFSVal((VarVals_t*)VV);
 }
@@ -470,6 +470,7 @@ interval IFS::Ival(const opInfo& opI, const interval& lv /* = interval() */, con
         opU.spans[1] = right->Ival(opU);
 
         distsqr = opU.spans[0] * opU.spans[0] + opU.spans[1] * opU.spans[1];
+
         if (itlo == -1 && distsqr.upper >= 4.0f) itlo = ithi + 1;
     } while (++ithi < IFS_MAX_ITER && distsqr.lower < 4.0f);
 

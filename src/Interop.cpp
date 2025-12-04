@@ -11,7 +11,7 @@
 #include "GL/freeglut.h"
 #include "cuda_gl_interop.h"
 #include "cuda_runtime_api.h"
-//#include "device_types.h"
+// #include "device_types.h"
 
 uc4DImage::uc4DImage()
 {

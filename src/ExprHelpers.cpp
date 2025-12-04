@@ -3,12 +3,6 @@
 #include <Math/Random.h>
 #include <Util/Assert.h>
 
-VarVals_t::VarVals_t(const int n)
-{
-    names.resize(n);
-    vals.resize(n);
-}
-
 bool optimizationGuide(const opInfo& opI, opPrio opP)
 { // Phase 0 == A only; 1 == early; 2 == late opt; 3 == late cleanup
     switch (opP) {

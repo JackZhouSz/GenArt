@@ -43,6 +43,7 @@ public:
     void ColorMapReorder(ColorMapOrderings_t CMapReordering);          // Reorder the ColorMap in one of the possible ways
     void SetColorMapEntry(const float v, const f3Pixel& dropperColor);
     f3Pixel EvalSample(const float x, const float y, float& r); // Compute the value of the three Exprs (but not color space conversion)
+    void OptimizeMathIndiv(Expr* Ri, Expr* Gi, Expr* Bi);
 
     virtual std::string stringSave();
     virtual std::string stringDisplay(const float x = -1000.0f, const float y = -1000.0f);
@@ -51,11 +52,11 @@ public:
     virtual bool less(const Individual& p) const;  // Really comparing two MathIndividuals, but signature must match base class
 
 private:
-    void init(Expr* Ri, Expr* Gi, Expr* Bi, ColorMap<f3Pixel>* CMap_);
+    void ImportColorMap(ColorMap<f3Pixel>* CMap_);
 
     void getColorSpaceIntervals(ColorSpace_t space, interval cspaceInterval[]) const; // Return the intervals of valid values for the given color space.
 
-    Expr* OptimizeChannel(Expr* A0, VarVals_t MinVV, VarVals_t MaxVV, const int sampSteps, const float maxAbsErr, const interval outSpan);
+    Expr* OptimizeChannel(Expr* A0, VarVals_t MinVV, VarVals_t MaxVV, opInfo opI, const interval outSpan);
 };
 
 // Load one MathIndividual from the file

@@ -501,9 +501,9 @@ void UI::Reshape(int w, int h)
     m_finalY = std::max(m_winHgt - RMan->finalHgt, 0);
 }
 
-void UI::MathStyleOps(int c, MathIndividual::shp ind)
+bool UI::MathStyleOps(int c, MathIndividual::shp ind)
 {
-    unsigned int mod = glutGetModifiers();
+    bool didSomething = true;
 
     switch (c) {
     case 'r': m_curChan = 0; break;
@@ -537,10 +537,17 @@ void UI::MathStyleOps(int c, MathIndividual::shp ind)
         std::cerr << "Reordering ColorMap as " << ColorMapOrderings[m_orderingColorMap] << std::endl;
         ind->ColorMapReorder(ColorMapOrderings_t(m_orderingColorMap));
         break;
-    case '\t': // Does both Individual and MathIndividual stuff.
+    case 'o': break; // Just optimize it again
+    case '\t':       // Gets CMap here, and current color in IndividualOps.
         m_dropperColorMap = ind->CMap;
-        break;
+        return false;
+    default: didSomething = false; break;
     }
+
+    // Optimize the individual since it's been edited
+    if (didSomething) ind->OptimizeMathIndiv(ind->R, ind->G, ind->B);
+
+    return didSomething;
 }
 
 void UI::IndividualOps(int c, int x, int y)
@@ -584,7 +591,7 @@ void UI::IndividualOps(int c, int x, int y)
 
     int a = c - '0';
     if (a >= 0 && a <= 9) {
-        m_curIndiv->SetScore(a * 0.1);
+        m_curIndiv->SetScore(a * 0.1f);
         if (AmChild(x, y)) { Pop->MoveChildToZoo(idx); }
         // std::cerr << "Score for image " << m_curIndiv << " is " << m_curIndiv->GetScore() << std::endl;
     }

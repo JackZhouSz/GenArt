@@ -15,16 +15,15 @@ extern RenderManager* RMan;
 
 MathIndividual::MathIndividual(Expr* Ri, Expr* Gi, Expr* Bi, ColorMap<f3Pixel>* CMap_, ColorSpace_t ColorSpace_, float Score_, int IDNum_, int Generation_,
                                int ParentA_, int ParentB_, float XMin_, float YMin_, float BoxWid_) :
-    Individual(Score_, IDNum_, Generation_, ParentA_, ParentB_, XMin_, YMin_, BoxWid_),
-    ColorSpace(ColorSpace_)
+    Individual(Score_, IDNum_, Generation_, ParentA_, ParentB_, XMin_, YMin_, BoxWid_), ColorSpace(ColorSpace_)
 {
-    init(Ri, Gi, Bi, CMap_);
+    OptimizeMathIndiv(Ri, Gi, Bi);
+    ImportColorMap(CMap_);
 }
 
 MathIndividual::MathIndividual(const std::string& Rs, const std::string& Gs, const std::string& Bs, ColorMap<f3Pixel>* CMap_, ColorSpace_t ColorSpace_,
                                float Score_, int IDNum_, int Generation_, int ParentA_, int ParentB_, float XMin_, float YMin_, float BoxWid_) :
-    Individual(Score_, IDNum_, Generation_, ParentA_, ParentB_, XMin_, YMin_, BoxWid_),
-    ColorSpace(ColorSpace_)
+    Individual(Score_, IDNum_, Generation_, ParentA_, ParentB_, XMin_, YMin_, BoxWid_), ColorSpace(ColorSpace_)
 {
     ASSERT_R(MSEng);
 
@@ -33,7 +32,8 @@ MathIndividual::MathIndividual(const std::string& Rs, const std::string& Gs, con
     Expr* Gi = ReadExpr(Gs, remainder, MSEng->VarVals());
     Expr* Bi = ReadExpr(Bs, remainder, MSEng->VarVals());
 
-    init(Ri, Gi, Bi, CMap_);
+    OptimizeMathIndiv(Ri, Gi, Bi);
+    ImportColorMap(CMap_);
 }
 
 MathIndividual::MathIndividual(const MathIndividual& In) : Individual(In), CMap(In.CMap)
@@ -61,12 +61,10 @@ namespace {
 float dist2d(float x, float y) { return sqrtf(sqr(x) + sqr(y)); }
 }; // namespace
 
-void MathIndividual::init(Expr* Ri, Expr* Gi, Expr* Bi, ColorMap<f3Pixel>* CMap_)
+void MathIndividual::OptimizeMathIndiv(Expr* Ri, Expr* Gi, Expr* Bi)
 {
     // Get ready for numeric optimization
     ASSERT_R(MSEng);
-    const int sampSteps = MSEng->NumOptSteps();
-    const float maxError = MSEng->NumOptMaxError();
 
     VarVals_t MaxVV = *MSEng->VarVals(), MinVV = *MSEng->VarVals();
 
@@ -108,12 +106,20 @@ void MathIndividual::init(Expr* Ri, Expr* Gi, Expr* Bi, ColorMap<f3Pixel>* CMap_
     interval spans[3];
     getColorSpaceIntervals(ColorSpace, spans);
 
-    R = OptimizeChannel(Ri, MinVV, MaxVV, sampSteps, maxError, spans[0]);
-    G = OptimizeChannel(Gi, MinVV, MaxVV, sampSteps, maxError, spans[1]);
-    B = OptimizeChannel(Bi, MinVV, MaxVV, sampSteps, maxError, spans[2]);
+    opInfo opI;
+    opI.sampSteps = MSEng->NumOptSteps();
+    opI.maxAbsErr = MSEng->NumOptMaxError();
+    opI.optLevel = MSEng->getOptLevel();
+
+    R = OptimizeChannel(Ri, MinVV, MaxVV, opI, spans[0]);
+    G = OptimizeChannel(Gi, MinVV, MaxVV, opI, spans[1]);
+    B = OptimizeChannel(Bi, MinVV, MaxVV, opI, spans[2]);
 
     MSEng->setTotalSizeAfterOpt(MSEng->getTotalSizeAfterOpt() + R->size() + G->size() + B->size());
+}
 
+void MathIndividual::ImportColorMap(ColorMap<f3Pixel>* CMap_)
+{
     // Import the ColorMap
     if (CMap_ != NULL && CMap_->size() > 0) {
         if (CMap_->size() < CMAP_SIZE) {
@@ -134,13 +140,14 @@ void MathIndividual::init(Expr* Ri, Expr* Gi, Expr* Bi, ColorMap<f3Pixel>* CMap_
     }
 }
 
-Expr* MathIndividual::OptimizeChannel(Expr* A0, VarVals_t MinVV, VarVals_t MaxVV, const int sampSteps, const float maxAbsErr, const interval outSpan)
+// Create and return optimized Expr; deletes input Expr
+Expr* MathIndividual::OptimizeChannel(Expr* A0, VarVals_t MinVV, VarVals_t MaxVV, opInfo opI, const interval outSpan)
 {
     Expr* A1 = RemoveNestedIFS(A0);
     delete A0;
 
-    if (MSEng->getOptimize())
-        A0 = Optimize(A1, MinVV, MaxVV, sampSteps, maxAbsErr, outSpan);
+    if (opI.optLevel > 0)
+        A0 = Optimize(A1, MinVV, MaxVV, opI, outSpan);
     else
         A0 = A1->Copy(); // Disable all optimization
     delete A1;
@@ -196,13 +203,7 @@ void MathIndividual::ScaleBiasChannel(int c, const float scale, const float bias
 void MathIndividual::ShuffleVars()
 {
     VarVals_t reVV;
-    const std::string VarNameList[] = {"y", "x", "r"};
-    const float VarValueList[] = {1.0f, 0.0f, 2.0f};
-
-    for (unsigned int i = 0; i < sizeof(VarValueList) / sizeof(float); i++) {
-        reVV.names.push_back(VarNameList[i]);
-        reVV.vals.push_back(VarValueList[i]);
-    }
+    reVV.vals = {1.0f, 0.0f, 2.0f}; // These are indices of variables to swap.
 
     if (R) {
         Expr* T = ReplaceVars(R, reVV);
@@ -372,9 +373,9 @@ std::string MathIndividual::stringDisplay(const float x /*= -1000.0f*/, const fl
         out << " " << std::endl;
     }
 
-    if (c) out << "R" << tostring(R->ivl) << " = " << R->Print(PREFIX) << std::endl;
-    out << "G" << tostring(G->ivl) << " = " << G->Print(PREFIX) << std::endl;
-    if (c) out << "B" << tostring(B->ivl) << " = " << B->Print(PREFIX) << std::endl;
+    if (c) out << "R" << tostring(R->ivl) << "(size: " << R->size() << ") = " << R->Print(PREFIX) << std::endl;
+    out << "G" << tostring(G->ivl) << "(size: " << G->size() << ") = " << G->Print(PREFIX) << std::endl;
+    if (c) out << "B" << tostring(B->ivl) << "(size: " << B->size() << ") = " << B->Print(PREFIX) << std::endl;
     out << " " << std::endl;
 
     if (c) out << "R = " << R->Print(INFIX) << std::endl; // Readable

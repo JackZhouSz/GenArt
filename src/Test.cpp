@@ -241,7 +241,6 @@ void TestFastSine()
 void TestExprCanBeDeleted()
 {
     VarVals_t VV;
-    InitVVals(VV);
     Expr* Jo(RandExpr(12, &VV));
 
     delete Jo;

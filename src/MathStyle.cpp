@@ -25,15 +25,11 @@ inline float L2Norm(const f3Pixel& p) { return sqrtf(sqr(p[0]) + sqr(p[1]) + sqr
 
 MathStyle::MathStyle()
 {
-    m_numOptSteps = 40;
-    m_numOptMaxError = 0.005f; // Really need to measure the effect on the final image, not on the subexpression's interval.
     m_TotalSizeBeforeOpt = 0;
     m_TotalSizeAfterOpt = 0;
-    m_allowOptimize = true;
     m_onlyColorMaps = false;
 
     m_VarVals = new VarVals_t;
-    InitVVals(*m_VarVals);
 }
 
 MathStyle::~MathStyle() { delete m_VarVals; }
@@ -56,7 +52,7 @@ void MathStyle::LoadPopulation(const std::string& inFName)
         bool skip = false;
         for (auto ind = Pop->beginZoo(); ind != Pop->endZoo(); ind++) {
             if ((*ind)->equal(*newInd)) {
-                std::cerr << "\nEqual ones:\n" << (*ind)->stringDisplay() << '\n' << newInd->stringDisplay() << '\n';
+                std::cerr << "\nDuplicates:\n" << (*ind)->stringDisplay() << '\n' << newInd->stringDisplay() << '\n';
                 skip = true;
                 break;
             } else if ((*ind)->IDNum == newInd->IDNum) {

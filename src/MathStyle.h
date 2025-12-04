@@ -24,31 +24,29 @@ public:
 
     // Make an MathIndividual whose ColorMap is derived from the given image
     MathIndividual::shp ImageColorMapToIndiv(const char* imgFName, int colorMapSize);
-
-    int NumOptSteps() const { return m_numOptSteps; }
-    void NumOptSteps(int val) { m_numOptSteps = val; }
-    float NumOptMaxError() const { return m_numOptMaxError; }
-    void NumOptMaxError(float val) { m_numOptMaxError = val; }
     bool OnlyColorMaps() const { return m_onlyColorMaps; }
     void OnlyColorMaps(bool val) { m_onlyColorMaps = val; }
+
+    int NumOptSteps() const { return m_opI.sampSteps; }
+    void NumOptSteps(int val) { m_opI.sampSteps = val; }
+    float NumOptMaxError() const { return m_opI.maxAbsErr; }
+    void NumOptMaxError(float val) { m_opI.maxAbsErr = val; }
+    int getOptLevel() const { return m_opI.optLevel; }
+    void setOptLevel(int val) { m_opI.optLevel = val; }
 
     int getTotalSizeBeforeOpt() const { return m_TotalSizeBeforeOpt; }
     void setTotalSizeBeforeOpt(int val) { m_TotalSizeBeforeOpt = val; }
     int getTotalSizeAfterOpt() const { return m_TotalSizeAfterOpt; }
     void setTotalSizeAfterOpt(int val) { m_TotalSizeAfterOpt = val; }
-    bool getOptimize() const { return m_allowOptimize; }
-    void setOptimize(bool val) { m_allowOptimize = val; }
 
     VarVals_t* VarVals() const { return m_VarVals; }
 
 private:
     int m_TotalSizeBeforeOpt; // For tracking how good optimization is upon loading
     int m_TotalSizeAfterOpt;  // For tracking how good optimization is upon loading
-    int m_numOptSteps;        // How many steps to take when numeric optimizing
-    float m_numOptMaxError;   // Threshold for considering a function constant in numeric optimization, on scale of 0==dark and 1==light
-    bool m_allowOptimize;     // Disable expression optimization for debugging
     bool m_onlyColorMaps;     // Only load the ColorMaps of individuals, not the whole things
 
+    opInfo m_opI;
     VarVals_t* m_VarVals;
 
     Expr* BreedChannel(const MathIndividual::shp Aa, const MathIndividual::shp Bb, int chan, ColorSpace_t ColorSpace, const VarVals_t* VV);

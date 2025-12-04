@@ -16,9 +16,6 @@ Expr* ReadExpr(const std::string Str, std::string& remain, const VarVals_t* VV);
 // Copy the VarVals_t struct into the VVals array
 void SetupVVals(const VarVals_t* VV, float* VVals);
 
-// Initialize the VarVals_t with x, y, r
-void InitVVals(VarVals_t& VV);
-
 // Convert Expr E to a token stream for evaluation in EvaluateTokens
 // Returns the number of tokens added
 int Tokenize(const Expr* E, int* Tok, int MaxTokens);
@@ -40,7 +37,7 @@ interval sampleIval(const Expr* E, const opInfo& opI, const interval& lv, const 
 // Return an optimized copy of Expr E.
 // Never modifies E. Never returns NULL.
 // Does symbolic, interval, and sampling optimizations.
-Expr* Optimize(const Expr* E, const VarVals_t& MinVV, const VarVals_t& MaxVV, const int steps, const float maxAbsErr, const interval outSpan);
+Expr* Optimize(const Expr* E, const VarVals_t& MinVV, const VarVals_t& MaxVV, opInfo opI, const interval outSpan);
 
 /////////////////////////////////////////////
 // Evolution

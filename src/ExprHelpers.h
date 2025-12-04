@@ -2,29 +2,29 @@
 
 #include "Interval.h"
 
-#include <vector>
+#include <array>
 
 // All the info about the variables
 // This is mostly just passed on the stack but is accessed by a Var expression.
 struct VarVals_t {
     static const int NUM_VARS = 3;
+    static inline const std::array<std::string, NUM_VARS> names = {"x", "y", "r"};
 
-    std::vector<std::string> names; // XXX Should this be static?
-    std::vector<float> vals;
-
-    VarVals_t() {}
-    VarVals_t(const int n);
+    std::array<float, NUM_VARS> vals = {0.f, 0.f, 0.f};
 };
 
+// OPT: Really need to measure the effect on the final image, not on the subexpression's interval.
+
+// For guiding optimization, especially numerical
 struct opInfo {
-    // For numerical optimization
     VarVals_t vn; // Used only for variable names and count of variables
     interval spans[VarVals_t::NUM_VARS];
-    float maxAbsErr;    // All values on interval must be within this percent difference to optimize
-    int sampSteps;          // Number of samples across the interval to compare per variable
-    bool stopAtMaxErr;  // True to stop sampling once the interval is larger than MaxErr
-    int phase;          // Optimization phase number (0,1,2,3)
-    bool swapSymmetric; // True to swap left and right children of symmetric binary operators
+    float maxAbsErr = 0.005f; // All values on interval must be within this percent difference to optimize
+    int sampSteps = 40;       // Number of samples across the interval to compare per variable
+    int optLevel = true;      // Expr optimization level; 0==none
+    bool stopAtMaxErr;        // True to stop sampling once the interval is larger than MaxErr
+    int phase;                // Optimization phase number (0,1,2,3)
+    bool swapSymmetric;       // True to swap left and right children of symmetric binary operators
 };
 
 // When to do a given optimization transformation

@@ -227,8 +227,12 @@ public:
 
 class TestItemOptimizer {
 public:
-    TestItemOptimizer(VarVals_t vvals_, int sampSteps_ = 531, float maxAbsErr_ = 0.01f) : sampSteps(sampSteps_), maxAbsErr(maxAbsErr_), MinVV(vvals_), MaxVV(vvals_)
+    TestItemOptimizer(VarVals_t vvals_, int sampSteps_ = 531, float maxAbsErr_ = 0.01f) : MinVV(vvals_), MaxVV(vvals_)
     {
+        opI.sampSteps = sampSteps_;
+        opI.maxAbsErr = maxAbsErr_;
+        opI.optLevel = 1;
+
         for (size_t i = 0; i < MinVV.vals.size(); i++) {
             MinVV.vals[i] = 0.0f;
             MaxVV.vals[i] = 1.0f;
@@ -240,7 +244,7 @@ public:
         interval outSpan;
         outSpan.set_infinite();
 
-        Expr* O = Optimize(A, MinVV, MaxVV, sampSteps, maxAbsErr, outSpan);
+        Expr* O = Optimize(A, MinVV, MaxVV, opI, outSpan);
         // std::cerr << O->Print(PREFIX) << std::endl << O->Print(PREFIX) << std::endl;
 
         return O;
@@ -249,8 +253,7 @@ public:
 private:
     VarVals_t MinVV;
     VarVals_t MaxVV;
-    int sampSteps;
-    float maxAbsErr;
+    opInfo opI;
 };
 
 class TestItemTokenizedEval {
@@ -539,8 +542,7 @@ class ResultActionLogFile {
 public:
     ResultActionLogFile(bool PrintErrors_, bool PrintAll_, std::ofstream& GoodEqnFile_, std::ofstream& BadEqnFile_, std::ofstream& GoodOptEqnFile_,
                         std::ofstream& BadOptEqnFile_) :
-        maxFailPercent(0),
-        m_tested(0), m_failed(0), m_printErrors(PrintErrors_), m_printAll(PrintAll_), m_goodEqnFile(GoodEqnFile_), m_badEqnFile(BadEqnFile_),
+        maxFailPercent(0), m_tested(0), m_failed(0), m_printErrors(PrintErrors_), m_printAll(PrintAll_), m_goodEqnFile(GoodEqnFile_), m_badEqnFile(BadEqnFile_),
         m_goodOptEqnFile(GoodOptEqnFile_), m_badOptEqnFile(BadOptEqnFile_)
     {
     }
@@ -611,7 +613,6 @@ void TestExpressions(const char* exprFName)
     // Set up the kind of test to run
 
     VarVals_t vvals;
-    InitVVals(vvals);
 
     TestItemOptimizer TestItem(vvals);
     // TestItemNull TestItem;

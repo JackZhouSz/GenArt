@@ -27,7 +27,9 @@ void interval::set(const float v1, const float v2)
 
 void interval::extend(const float v)
 {
-    lower = std::min(lower, v); // In debug mode these return a different result than release mode with NaN.
+    // These return different results in debug vs. release mode with NaN.
+    // v can be Nan if it's the result of 0 * inf.
+    lower = std::min(lower, v);
     upper = std::max(upper, v);
 }
 
@@ -85,13 +87,21 @@ interval operator+(const interval& ivl, const interval& ivr)
     return iout;
 }
 
+namespace {
+float mymul(float a, float b)
+{
+    if (a == 0.f || b == 0.f) return 0.f;
+    return a * b;
+}
+} // namespace
+
 interval operator*(const interval& ivl, const interval& ivr)
 {
     interval iout;
-    iout.extend(ivr.lower * ivl.lower);
-    iout.extend(ivr.lower * ivl.upper);
-    iout.extend(ivr.upper * ivl.lower);
-    iout.extend(ivr.upper * ivl.upper);
+    iout.extend(mymul(ivr.lower, ivl.lower));
+    iout.extend(mymul(ivr.lower, ivl.upper));
+    iout.extend(mymul(ivr.upper, ivl.lower));
+    iout.extend(mymul(ivr.upper, ivl.upper));
 
     return iout;
 }

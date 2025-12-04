@@ -143,18 +143,6 @@ void CopyVValsToArray(const VarVals_t* VV, float* VVals)
     for (size_t i = 0; i < VV->vals.size(); i++) VVals[i] = VV->vals[i];
 }
 
-void InitVVals(VarVals_t& VV)
-{
-    // Set up VV by copying from the static arrays
-    const std::string VarNameList[] = {"x", "y", "r"}; // , "t" };
-    const float VarValueList[] = {0.0f, 0.0f, 0.0f};   // , 0.5f };
-
-    for (unsigned int i = 0; i < sizeof(VarValueList) / sizeof(float); i++) {
-        VV.names.push_back(VarNameList[i]);
-        VV.vals.push_back(VarValueList[i]);
-    }
-}
-
 int Tokenize(const Expr* E, int* TokenStream, int MaxTokens)
 {
     int NSize = E->postTokenStream(TokenStream, MaxTokens);
@@ -358,16 +346,13 @@ interval sampleIval(const Expr* E, const opInfo& opI, const interval& lv, const 
 // Only do this when the descendant itself is about to be deleted.
 // Since Opt() may call GrabRL() on itself it must immediately return so as not to access the left and right pointers, which are now NULL.
 
-Expr* Optimize(const Expr* E, const VarVals_t& MinVV, const VarVals_t& MaxVV, const int sampSteps, const float maxAbsErr, const interval outSpan)
+Expr* Optimize(const Expr* E, const VarVals_t& MinVV, const VarVals_t& MaxVV, opInfo opI, const interval outSpan)
 {
     Expr* F = E->Copy();
     int sizePre = E->size();
 
-    opInfo opI;
     opI.vn = MinVV;
     for (int phase = 0; phase < VarVals_t::NUM_VARS; phase++) opI.spans[phase] = interval(MinVV.vals[phase], MaxVV.vals[phase]);
-    opI.sampSteps = sampSteps;
-    opI.maxAbsErr = maxAbsErr;
 
     for (opI.phase = 0; opI.phase < 4; opI.phase++) {
         int j = 0;
@@ -381,7 +366,7 @@ Expr* Optimize(const Expr* E, const VarVals_t& MinVV, const VarVals_t& MaxVV, co
                 delete F;
                 F = A;
             }
-        } while ((A || j < 15) && j++ < 40); // Try 15 times even with no change in expr, then up to 40 times with changes
+        } while ((A || j < (15 * opI.optLevel)) && j++ < (40 * opI.optLevel)); // Try 15 times even with no change in expr, then up to 40 times with changes
     }
 
     // Clamp to the color space's interval
@@ -598,7 +583,7 @@ Expr* ReplaceVars(Expr* E, const VarVals_t& reVV)
     if (typeid(*E) == typeid(Var)) {
         Var* V = dynamic_cast<Var*>(E);
         int oVID = (int)V->getVarID();
-        return new Var(reVV.names[oVID], reVV.vals[oVID]);
+        return new Var(reVV.names[(int)reVV.vals[oVID]], reVV.vals[oVID]);
     } else {
         Expr* L = E->left ? ReplaceVars(E->left, reVV) : NULL;
         if (L && L != E->left) {

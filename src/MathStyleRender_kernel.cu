@@ -4,11 +4,11 @@
 #include "RenderHelpers.h"
 
 // Put clock count in alpha channel
-//#define CLOCKS
+// #define CLOCKS
 // Rotate the Halton sequence. Costs 10% perf. 2 regs.
-//#define ROTATION
+// #define ROTATION
 // If only one sample is rendered, don't jitter it so that lines come out straight. 1 reg.
-//#define NO_JITTER_ONE_SAMPLE
+// #define NO_JITTER_ONE_SAMPLE
 // Experiment with a hardcoded equation: 16 regs for main loop + color spaces
 // #define HARDCODED
 // Making these templated saves 3 regs and speeds it up.
