@@ -54,18 +54,11 @@ std::string BinaryExpr::Print(int pstyle) const
         return ((pstyle & FUNC_EVAL) ? getFuncName() : getName()) + "(" + left->Print(pstyle) + ", " + right->Print(pstyle) + ")";
 }
 
-int BinaryExpr::preTokenStream(int* TokenStream, const int max_len) const
-{
-    *(TokenStream) = getToken();
-    int WrittenL = left->preTokenStream(TokenStream + 1, max_len - 1);
-    int WrittenR = right->preTokenStream(TokenStream + WrittenL + 1, max_len - WrittenL - 1);
-    return 1 + WrittenL + WrittenR;
-}
-
 int BinaryExpr::postTokenStream(int* TokenStream, const int max_len) const
 {
     int cntL = left->postTokenStream(TokenStream, max_len - 1);
     int cntR = right->postTokenStream(TokenStream + cntL, max_len - cntL - 1);
+    ASSERT_D(cntL == left->TokenCount() && cntR == right->TokenCount());
     ASSERT_R(cntL + cntR < max_len);
     TokenStream[cntL + cntR] = getToken();
     return cntL + cntR + 1;
@@ -110,7 +103,7 @@ Expr* BinaryExpr::OptHelp(const opInfo& opI)
 
     init(left, right);
     ivl = Ival(opI, left->ivl, right->ivl);
-    // std::cerr << "Bin " << count << tostring(ivl) << Print(PREFIX) << '\n';
+    // std::cerr << "Bin " << nodeCount << tostring(ivl) << Print(PREFIX) << '\n';
     ASSERT_D(!IsNaN(ivl.lower) && !IsNaN(ivl.upper));
     ASSERT_D(!ivl.empty());
 
@@ -122,7 +115,7 @@ Expr* BinaryExpr::OptHelp(const opInfo& opI)
 
     // If interval is flat over the range, return a constant with the same value as this expression.
     if (ivl.span() <= opI.maxAbsErr && FOG(AI)) {
-        // std::cerr << "\nBConst: " << count << tostring(ivl) << ' ' << Print(PREFIX) << '\n';
+        // std::cerr << "\nBConst: " << nodeCount << tostring(ivl) << ' ' << Print(PREFIX) << '\n';
         ivl = interval(ivl.lower); // Ivl is a return value, so make it accurate.
         return new Const(ivl.lower);
     }
@@ -169,8 +162,9 @@ void BinaryExpr::init(Expr* E1, Expr* E2)
 {
     left = E1;
     right = E2;
-    count = left->size() + right->size() + 1;
-    hasVars = left->hasVars | right->hasVars;
+    nodeCount = left->size() + right->size() + 1;
+    tokenCount = left->TokenCount() + right->TokenCount() + 1;
+    varMask = left->varMask | right->varMask;
 }
 
 Expr* BinaryExpr::Mutate(const int prob, const int siz, const float ConstPerturb, const VarVals_t* VV)
@@ -498,6 +492,7 @@ int IFS::postTokenStream(int* TokenStream, const int max_len) const
 {
     int cntL = left->postTokenStream(TokenStream, max_len - 1);
     int cntR = right->postTokenStream(TokenStream + cntL, max_len - cntL - 1);
+    ASSERT_D(cntL == left->TokenCount() && cntR == right->TokenCount());
     ASSERT_R(cntL + cntR < max_len);
     // Tell how big the left and right children are so we can find them in stream
     TokenStream[cntL + cntR] = int(token) | ((cntL + cntR) << 16);

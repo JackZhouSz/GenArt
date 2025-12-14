@@ -24,8 +24,9 @@ Expr* Expr::PerturbConstants(const float rc)
 Expr::Expr()
 {
     left = right = NULL;
-    count = 0;
-    hasVars = 0;
+    nodeCount = 0;
+    tokenCount = 0;
+    varMask = 0u;
     // Ivl is still empty
 }
 
@@ -41,7 +42,7 @@ Expr* Expr::GrabL()
 {
     Expr* Tmp = left;
     left = NULL;
-    count = 0; // Invalidate my records
+    nodeCount = 0; // Invalidate my records
     return Tmp;
 }
 
@@ -49,22 +50,43 @@ Expr* Expr::GrabR()
 {
     Expr* Tmp = right;
     right = NULL;
-    count = 0; // Invalidate my records
+    nodeCount = 0; // Invalidate my records
     return Tmp;
 }
 
-unsigned int Expr::HasVars() const
+unsigned int Expr::VarMask() const
 {
-    ASSERT_R(count > 0);
+    ASSERT_R(nodeCount > 0);
 
-    return hasVars;
+    return varMask;
 }
 
 int Expr::size() const
 {
-    ASSERT_R(count > 0);
+    // ASSERT_R(nodeCount > 0);
 
-    return count;
+    int cnt = 1;
+    if (left) cnt += left->size();
+    if (right) cnt += right->size();
+    // ASSERT_R(cnt == nodeCount);
+    // nodeCount = cnt;
+
+    return cnt; // A hack
+}
+
+int Expr::TokenCount() const
+{
+    // ASSERT_R(nodeCount > 0 && tokenCount > 0);
+
+    int cnt = 1;
+    if (left)
+        cnt += left->TokenCount();
+    else
+        cnt++; // XXX Handle Var and Const
+    if (right) cnt += right->TokenCount();
+
+    return cnt;
+    // return tokenCount;
 }
 
 Expr* const* Expr::FindRand(int& count) const

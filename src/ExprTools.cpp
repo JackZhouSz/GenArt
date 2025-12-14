@@ -275,7 +275,7 @@ interval sampleIval(const Expr* E, const opInfo& opI, const interval& lv, const 
 {
     ASSERT_D(VarVals_t::NUM_VARS == 3);
 
-    unsigned int hasV = E->HasVars();
+    unsigned int hasV = E->VarMask();
     interval iout;
     VarVals_t VV = opI.vn;
 

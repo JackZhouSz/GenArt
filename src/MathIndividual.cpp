@@ -116,6 +116,20 @@ void MathIndividual::OptimizeMathIndiv(Expr* Ri, Expr* Gi, Expr* Bi)
     B = OptimizeChannel(Bi, MinVV, MaxVV, opI, spans[2]);
 
     MSEng->setTotalSizeAfterOpt(MSEng->getTotalSizeAfterOpt() + R->size() + G->size() + B->size());
+
+    // After optimizing, check whether it's still too big to be rendered
+    if (R->TokenCount() + G->TokenCount() + B->TokenCount() >= MAX_TOKENS && G->TokenCount() > 1) {
+        delete G;
+        G = OptimizeChannel(RandNonaryNode(MSEng->VarVals()), MinVV, MaxVV, opI, spans[1]);
+    }
+    if (R->TokenCount() + G->TokenCount() + B->TokenCount() >= MAX_TOKENS && R->TokenCount() > 1) {
+        delete R;
+        R = RandNonaryNode(MSEng->VarVals());
+    }
+    if (R->TokenCount() + G->TokenCount() + B->TokenCount() >= MAX_TOKENS && B->TokenCount() > 1) {
+        delete B;
+        B = RandNonaryNode(MSEng->VarVals());
+    }
 }
 
 void MathIndividual::ImportColorMap(ColorMap<f3Pixel>* CMap_)

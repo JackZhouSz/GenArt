@@ -5,6 +5,7 @@
 #include "MathStyleDefines.h"
 
 #include <Image/ColorMap.h>
+
 #include <memory>
 #include <string>
 

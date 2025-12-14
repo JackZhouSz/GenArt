@@ -32,13 +32,6 @@ std::string Const::Print(int pstyle) const
     return st.str() + ((pstyle & PREFIX) ? " " : "");
 }
 
-int Const::preTokenStream(int* TokenStream, const int max_len) const
-{
-    *(TokenStream++) = token;
-    *(TokenStream++) = floatAsUint(val);
-    return 2;
-}
-
 int Const::postTokenStream(int* TokenStream, const int max_len) const
 {
     ASSERT_R(max_len >= 2);
@@ -82,15 +75,17 @@ void Const::SetConst(float v) { val = v; }
 Const::Const()
 {
     val = 0.0f;
-    count = 1;
-    hasVars = 0u;
+    nodeCount = 1;
+    tokenCount = 2;
+    varMask = 0u;
 }
 
 Const::Const(float v)
 {
     val = v;
-    count = 1;
-    hasVars = 0u;
+    nodeCount = 1;
+    tokenCount = 2;
+    varMask = 0u;
 }
 
 float Var::Eval(const VarVals_t* VV /*= NULL*/) const
@@ -104,13 +99,6 @@ interval Var::Ival(const opInfo& opI, const interval& lv /* = interval() */, con
 Expr* Var::Copy() const { return new Var(*this); }
 
 std::string Var::Print(int pstyle) const { return VarName + ((pstyle & PREFIX) ? " " : ""); }
-
-int Var::preTokenStream(int* TokenStream, const int max_len) const
-{
-    *(TokenStream++) = token;
-    *(TokenStream++) = (int)VarID;
-    return 2;
-}
 
 int Var::postTokenStream(int* TokenStream, const int max_len) const
 {
@@ -148,14 +136,15 @@ bool Var::isless(const Expr* E) const
         return getToken() < E->getToken();
 }
 
-Var::Var() { count = 0; }
+Var::Var() { nodeCount = 0; }
 
 Var::Var(const std::string VarName_, int VarID_)
 {
     VarID = VarID_;
     VarName = VarName_;
-    hasVars = (1u << VarID);
-    count = 1;
+    varMask = (1u << VarID);
+    nodeCount = 1;
+    tokenCount = 2;
 }
 
 std::string Var::GetVarName() const { return VarName; }

@@ -18,9 +18,10 @@ class Expr {
 public:
     Expr* left;
     Expr* right;
-    interval ivl; // NOTE: The interval is a function of the current ranges of the variables
-    int count;
-    unsigned int hasVars;
+    interval ivl;         // NOTE: The interval is a function of the current ranges of the variables
+    int nodeCount;        // Count of nodes in this Expr; if 0 then nodeCount, tokenCount, and hasVars are invalid.
+    int tokenCount;       // Count of tokens in this Expr (same as nodeCount but counts 2 for each Const and Var)
+    unsigned int varMask; // A bit mask of vars residing in this Expr
 
     // static std::string name; // Name of the token stored in the file
     // static std::string fname; // Name of the function that evaluates it
@@ -48,10 +49,6 @@ public:
     // Return a string representing this Expr
     virtual std::string Print(int pstyle) const = 0;
 
-    // Fill in a prefix tokenized stream made of ExprOpcodes_t with inline floats and variable indices representing this Expr
-    // Returns the number of words written
-    virtual int preTokenStream(int* TokenStream, const int max_len) const = 0;
-
     // Fill in a postfix tokenized stream made of ExprOpcodes_t with inline floats and variable indices representing this Expr
     // Returns the number of words written
     virtual int postTokenStream(int* TokenStream, const int max_len) const = 0;
@@ -75,31 +72,21 @@ public:
     // Set all constants in this Expr to randomly perturbed values.
     virtual Expr* PerturbConstants(const float rc);
 
-    // True if the given Expr symbolically equals this.
-    virtual bool isequal(const Expr* E) const = 0;
-    // True if the given Expr is symbolically less than this.
-    virtual bool isless(const Expr* E) const = 0;
-
-protected:
-    Expr();
-
-public:
-    ~Expr();
-
-    // Detach a child and return it.
-    Expr* GrabL();
-
-    // Detach a child and return it.
-    Expr* GrabR();
-
-    // Bitmask of variables that occur in this expression
-    unsigned int HasVars() const;
-
-    // Return the number of nodes in this expression tree
-    int size() const;
+    virtual bool isequal(const Expr* E) const = 0; // True if the given Expr symbolically equals this.
+    virtual bool isless(const Expr* E) const = 0;  // True if the given Expr is symbolically less than this.
+    Expr* GrabL();                                 // Detach a child and return it
+    Expr* GrabR();                                 // Detach a child and return it
+    unsigned int VarMask() const;                  // Bitmask of variables that occur in this expression
+    int size() const;                              // Return the number of nodes in this expression tree
+    int TokenCount() const;                        // Return tokenCount
 
     // Return a pointer to a uniformly distributed random node in this expression
     // Return either the left child's choice, the right child's choice, or the left or right child itself
-    // count is return count of nodes, including root
+    // count is return count of nodes in subtree, including its root
     Expr* const* FindRand(int& count) const;
+
+    ~Expr();
+
+protected:
+    Expr();
 };

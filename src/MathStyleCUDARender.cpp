@@ -62,12 +62,16 @@ void MathStyleCUDARender::Render(Individual* ind_, uc4DImage* Im, const int w_, 
 
     ////////////////////////////////////////////
     // Set up the tokenized expressions
+    int preTokenCount = 1 + ind->R->TokenCount() + ind->G->TokenCount() + ind->B->TokenCount();
+    ASSERT_RM(preTokenCount <= MAX_TOKENS, "Individual is too complex to be rendered");
+
     int HostTokens[MAX_TOKENS];
     int TokenCnt = 1; // Leave slot 0 for the length
     TokenCnt += Tokenize(ind->R, HostTokens + TokenCnt, MAX_TOKENS - TokenCnt);
     TokenCnt += Tokenize(ind->G, HostTokens + TokenCnt, MAX_TOKENS - TokenCnt);
     TokenCnt += Tokenize(ind->B, HostTokens + TokenCnt, MAX_TOKENS - TokenCnt);
     HostTokens[0] = TokenCnt;
+    ASSERT_R(preTokenCount == TokenCnt);
 
     loadTokensToConstant(HostTokens, sizeof(HostTokens));
 

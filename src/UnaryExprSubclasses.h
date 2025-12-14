@@ -10,7 +10,6 @@ public:
 
     std::string Print(int pstyle) const;
 
-    int preTokenStream(int* TokenStream, const int max_len) const;
     int postTokenStream(int* TokenStream, const int max_len) const;
 
 protected:
@@ -42,7 +41,7 @@ public:
     Expr* Copy() const;
     Expr* Opt(const opInfo& opI);
 
-    inline Abs() { count = 0; }
+    inline Abs() { nodeCount = 0; }
     inline Abs(Expr* E) { init(E); }
 };
 
@@ -61,7 +60,7 @@ public:
     Expr* Copy() const;
     Expr* Opt(const opInfo& opI);
 
-    inline ACos() { count = 0; }
+    inline ACos() { nodeCount = 0; }
     inline ACos(Expr* E) { init(E); }
 };
 
@@ -80,7 +79,7 @@ public:
     Expr* Copy() const;
     Expr* Opt(const opInfo& opI);
 
-    inline ASin() { count = 0; }
+    inline ASin() { nodeCount = 0; }
     inline ASin(Expr* E) { init(E); }
 };
 
@@ -99,7 +98,7 @@ public:
     Expr* Copy() const;
     Expr* Opt(const opInfo& opI);
 
-    inline ATan() { count = 0; }
+    inline ATan() { nodeCount = 0; }
     inline ATan(Expr* E) { init(E); }
 };
 
@@ -121,7 +120,7 @@ public:
     Expr* Copy() const;
     Expr* Opt(const opInfo& opI);
 
-    inline BitNot() { count = 0; }
+    inline BitNot() { nodeCount = 0; }
     inline BitNot(Expr* E) { init(E); }
 };
 
@@ -140,7 +139,7 @@ public:
     Expr* Copy() const;
     Expr* Opt(const opInfo& opI);
 
-    inline Cbrt() { count = 0; }
+    inline Cbrt() { nodeCount = 0; }
     inline Cbrt(Expr* E) { init(E); }
 };
 
@@ -159,7 +158,7 @@ public:
     Expr* Copy() const;
     Expr* Opt(const opInfo& opI);
 
-    inline Clamp() { count = 0; }
+    inline Clamp() { nodeCount = 0; }
     inline Clamp(Expr* E) { init(E); }
 };
 
@@ -178,7 +177,7 @@ public:
     Expr* Copy() const;
     Expr* Opt(const opInfo& opI);
 
-    inline Cos() { count = 0; }
+    inline Cos() { nodeCount = 0; }
     inline Cos(Expr* E) { init(E); }
 };
 
@@ -197,7 +196,7 @@ public:
     Expr* Copy() const;
     Expr* Opt(const opInfo& opI);
 
-    inline Cube() { count = 0; }
+    inline Cube() { nodeCount = 0; }
     inline Cube(Expr* E) { init(E); }
 };
 
@@ -216,7 +215,7 @@ public:
     Expr* Copy() const;
     Expr* Opt(const opInfo& opI);
 
-    inline Exp() { count = 0; }
+    inline Exp() { nodeCount = 0; }
     inline Exp(Expr* E) { init(E); }
 };
 
@@ -235,7 +234,7 @@ public:
     Expr* Copy() const;
     Expr* Opt(const opInfo& opI);
 
-    inline Ln() { count = 0; }
+    inline Ln() { nodeCount = 0; }
     inline Ln(Expr* E) { init(E); }
 };
 
@@ -254,7 +253,7 @@ public:
     Expr* Copy() const;
     Expr* Opt(const opInfo& opI);
 
-    inline Round() { count = 0; }
+    inline Round() { nodeCount = 0; }
     inline Round(Expr* E) { init(E); }
 };
 
@@ -273,7 +272,7 @@ public:
     Expr* Copy() const;
     Expr* Opt(const opInfo& opI);
 
-    inline Sin() { count = 0; }
+    inline Sin() { nodeCount = 0; }
     inline Sin(Expr* E) { init(E); }
 };
 
@@ -292,7 +291,7 @@ public:
     Expr* Copy() const;
     Expr* Opt(const opInfo& opI);
 
-    inline Sqr() { count = 0; }
+    inline Sqr() { nodeCount = 0; }
     inline Sqr(Expr* E) { init(E); }
 };
 
@@ -311,7 +310,7 @@ public:
     Expr* Copy() const;
     Expr* Opt(const opInfo& opI);
 
-    inline Sqrt() { count = 0; }
+    inline Sqrt() { nodeCount = 0; }
     inline Sqrt(Expr* E) { init(E); }
 };
 
@@ -330,7 +329,7 @@ public:
     Expr* Copy() const;
     Expr* Opt(const opInfo& opI);
 
-    inline Tan() { count = 0; }
+    inline Tan() { nodeCount = 0; }
     inline Tan(Expr* E) { init(E); }
 };
 
@@ -352,6 +351,6 @@ public:
     Expr* Copy() const;
     Expr* Opt(const opInfo& opI);
 
-    inline UnaryMinus() { count = 0; }
+    inline UnaryMinus() { nodeCount = 0; }
     inline UnaryMinus(Expr* E) { init(E); }
 };

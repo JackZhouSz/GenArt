@@ -29,7 +29,6 @@ public:
 
     std::string Print(int pstyle) const;
 
-    int preTokenStream(int* TokenStream, const int max_len) const;
     int postTokenStream(int* TokenStream, const int max_len) const;
 
     Expr* Opt(const opInfo& opI);
@@ -49,7 +48,7 @@ public:
     void UniformRandom();   // Fill this constant with a uniform random variable on 0..1
     void SetConst(float v); // Fill this constant with value v
 
-    unsigned int HasVars() const { return 0u; }
+    unsigned int VarMask() const { return 0u; }
 
 private:
     float val;
@@ -72,7 +71,6 @@ public:
 
     std::string Print(int pstyle) const;
 
-    int preTokenStream(int* TokenStream, const int max_len) const;
     int postTokenStream(int* TokenStream, const int max_len) const;
 
     Expr* Opt(const opInfo& opI);
@@ -88,7 +86,7 @@ public:
 
     size_t getVarID() const;
     std::string GetVarName() const;
-    unsigned int HasVars() const; // Bitmask of variables that occur in this expression
+    unsigned int VarMask() const; // Bitmask of variables that occur in this expression
 
 private:
     std::string VarName; // Since we don't have VarVals access, keep a local copy of the name

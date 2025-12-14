@@ -72,15 +72,10 @@ std::string UnaryExpr::Print(int pstyle) const
         return ((pstyle & FUNC_EVAL) ? getFuncName() : getName()) + "(" + left->Print(pstyle) + ")";
 }
 
-int UnaryExpr::preTokenStream(int* TokenStream, const int max_len) const
-{
-    *(TokenStream) = getToken();
-    return 1 + left->preTokenStream(TokenStream + 1, max_len - 1);
-}
-
 int UnaryExpr::postTokenStream(int* TokenStream, const int max_len) const
 {
     int cnt = left->postTokenStream(TokenStream, max_len - 1);
+    ASSERT_D(cnt == left->TokenCount());
     ASSERT_R(cnt < max_len);
     TokenStream[cnt] = getToken();
     return cnt + 1;
@@ -107,7 +102,7 @@ Expr* UnaryExpr::OptHelp(const opInfo& opI)
 
     init(left);
     ivl = Ival(opI, left->ivl);
-    // std::cerr << "Una " << count << tostring(ivl) << Print(PREFIX) << '\n';
+    // std::cerr << "Una " << nodeCount << tostring(ivl) << Print(PREFIX) << '\n';
     ASSERT_D(!IsNaN(ivl.lower) && !IsNaN(ivl.upper));
     ASSERT_D(!ivl.empty());
 
@@ -119,7 +114,7 @@ Expr* UnaryExpr::OptHelp(const opInfo& opI)
 
     // If interval is flat over the range, return a constant with the same value as this expression.
     if (ivl.span() <= opI.maxAbsErr && FOG(AI)) {
-        // std::cerr << "\nUConst: " << count << tostring(ivl) << ' ' << Print(PREFIX) << '\n';
+        // std::cerr << "\nUConst: " << nodeCount << tostring(ivl) << ' ' << Print(PREFIX) << '\n';
         ivl = interval(ivl.lower); // Ivl is a return value, so make it accurate.
         return new Const(ivl.lower);
     }
@@ -131,8 +126,9 @@ Expr* UnaryExpr::OptHelp(const opInfo& opI)
 void UnaryExpr::init(Expr* E)
 {
     left = E;
-    count = left->size() + 1;
-    hasVars = left->hasVars;
+    nodeCount = left->size() + 1;
+    tokenCount = left->TokenCount() + 1;
+    varMask = left->varMask;
     // Ivl will still be empty until Opt or Ival is called.
 }
 

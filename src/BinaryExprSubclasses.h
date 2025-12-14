@@ -10,7 +10,6 @@ public:
 
     std::string Print(int pstyle) const; // Plus, Minus, Mult are pure operators.
 
-    int preTokenStream(int* TokenStream, const int max_len) const;
     int postTokenStream(int* TokenStream, const int max_len) const;
 
 protected:
@@ -46,7 +45,7 @@ public:
     Expr* Copy() const;
     Expr* Opt(const opInfo& opI);
 
-    inline And() { count = 0; }
+    inline And() { nodeCount = 0; }
     inline And(Expr* E1, Expr* E2) { init(E1, E2); }
 };
 
@@ -65,7 +64,7 @@ public:
     Expr* Copy() const;
     Expr* Opt(const opInfo& opI);
 
-    inline ATan2() { count = 0; }
+    inline ATan2() { nodeCount = 0; }
     inline ATan2(Expr* E1, Expr* E2) { init(E1, E2); }
 };
 
@@ -87,7 +86,7 @@ public:
     Expr* Copy() const;
     Expr* Opt(const opInfo& opI);
 
-    inline Div() { count = 0; }
+    inline Div() { nodeCount = 0; }
     inline Div(Expr* E1, Expr* E2) { init(E1, E2); }
 };
 
@@ -109,7 +108,7 @@ public:
     // This one is unique. Can't use the BinaryExpr implementation.
     int postTokenStream(int* TokenStream, const int max_len) const;
 
-    inline IFS() { count = 0; }
+    inline IFS() { nodeCount = 0; }
     inline IFS(Expr* E1, Expr* E2) { init(E1, E2); }
 
 private:
@@ -134,7 +133,7 @@ public:
     Expr* Copy() const;
     Expr* Opt(const opInfo& opI);
 
-    inline Minus() { count = 0; }
+    inline Minus() { nodeCount = 0; }
     inline Minus(Expr* E1, Expr* E2) { init(E1, E2); }
 };
 
@@ -156,7 +155,7 @@ public:
     Expr* Copy() const;
     Expr* Opt(const opInfo& opI);
 
-    inline Mod() { count = 0; }
+    inline Mod() { nodeCount = 0; }
     inline Mod(Expr* E1, Expr* E2) { init(E1, E2); }
 };
 
@@ -179,7 +178,7 @@ public:
     Expr* Copy() const;
     Expr* Opt(const opInfo& opI);
 
-    inline Mult() { count = 0; }
+    inline Mult() { nodeCount = 0; }
     inline Mult(Expr* E1, Expr* E2) { init(E1, E2); }
 };
 
@@ -202,7 +201,7 @@ public:
     Expr* Copy() const;
     Expr* Opt(const opInfo& opI);
 
-    inline Or() { count = 0; }
+    inline Or() { nodeCount = 0; }
     inline Or(Expr* E1, Expr* E2) { init(E1, E2); }
 };
 
@@ -225,7 +224,7 @@ public:
     Expr* Copy() const;
     Expr* Opt(const opInfo& opI);
 
-    inline Plus() { count = 0; }
+    inline Plus() { nodeCount = 0; }
     inline Plus(Expr* E1, Expr* E2) { init(E1, E2); }
 };
 
@@ -244,7 +243,7 @@ public:
     Expr* Copy() const;
     Expr* Opt(const opInfo& opI);
 
-    inline Pow() { count = 0; }
+    inline Pow() { nodeCount = 0; }
     inline Pow(Expr* E1, Expr* E2) { init(E1, E2); }
 };
 
@@ -267,6 +266,6 @@ public:
     Expr* Copy() const;
     Expr* Opt(const opInfo& opI);
 
-    inline XOr() { count = 0; }
+    inline XOr() { nodeCount = 0; }
     inline XOr(Expr* E1, Expr* E2) { init(E1, E2); }
 };

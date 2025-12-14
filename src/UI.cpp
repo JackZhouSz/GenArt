@@ -208,8 +208,6 @@ void UI::StartUI(int& argc, char** argv)
     glutAddMenuEntry("0 or DEL or d: Delete Individual", '0');
     glutAddMenuEntry("1: Set Score...", '1');
     glutAddMenuEntry("9: Set Score", '9');
-    glutAddMenuEntry("RIGHT: Animate Individual", GLUT_KEY_RIGHT + KEY_OFFSET);
-    glutAddMenuEntry("LEFT: Animate Individual", GLUT_KEY_LEFT + KEY_OFFSET);
 
     glutAddMenuEntry("__MATH INDIVIDUAL__", 765);
     glutAddMenuEntry("r: Choose Red Channel", 'r');
@@ -217,6 +215,8 @@ void UI::StartUI(int& argc, char** argv)
     glutAddMenuEntry("b: Choose Blue Channel", 'b');
     glutAddMenuEntry("[: Scale Down Channel", '[');
     glutAddMenuEntry("]: Scale Up Channel", ']');
+    glutAddMenuEntry("{: Bias Down Channel", '[');
+    glutAddMenuEntry("}: Bias Up Channel", ']');
     glutAddMenuEntry("R: Replicate Channel", 'R');
     glutAddMenuEntry("C: Randomize constants", 'C');
     glutAddMenuEntry("u: Set pixel from eyedropper", 'u');
